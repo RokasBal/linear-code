@@ -1,20 +1,15 @@
-build: linear-code.o generateMatrix.o
-	g++ linear-code.o generateMatrix.o -o linear-code
+SRC = $(wildcard */*.cpp) linear-code.cpp
+
+build:
+	g++ -O3 $(SRC) -o linear-code
 
 run:
 	make cleanLin
 	make build
 	.\linear-code.exe
 
-debug: generateMatrix.o
-	g++ -g linear-code.cpp generateMatrix.o
-
-linear-code.o: linear-code.cpp
-	g++ -c linear-code.cpp
-
-generateMatrix.o:
-	cd utils
-	g++ -c utils/generateMatrix.cpp
+debug:
+	g++ -g $(SRC) -o linear-code-debug
 
 clean:
 	del *.o

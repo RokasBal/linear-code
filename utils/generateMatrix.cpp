@@ -59,11 +59,3 @@ Matrix generateParityMatrix(const Matrix& matrix) {
     return parityMatrix;
 }
 
-void displayMatrix(const Matrix& matrix) {
-    for (const auto& row : matrix) {
-        for (const auto& elem : row) {
-            std::cout << static_cast<int>(elem) << " ";
-        }
-        std::cout << std::endl;
-    }
-}
