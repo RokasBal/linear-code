@@ -1,9 +1,10 @@
-#ifndef MATRIXGEN_H
-#define MATRIXGEN_H
+#ifndef GENERATEMATRIX_H
+#define GENERATEMATRIX_H
 
 #include "matrix.h"
 
 Matrix generateRandomMatrix(int k, int n);
+Matrix generateUserMatrix(int k, int n);
 Matrix generateParityMatrix(const Matrix& matrix);
 
-#endif // MATRIXGEN_H
+#endif // GENERATEMATRIX_H

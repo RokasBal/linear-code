@@ -31,6 +31,23 @@ void displaySyndromes(const std::vector<std::pair<int, std::vector<uint8_t>>>& s
     }
 }
 
+void displayVectorWithMistakes(const std::vector<uint8_t>& vec1, const std::vector<uint8_t>& vec2) {
+    for (size_t i = 0; i < vec2.size(); ++i) {
+        std::cout << static_cast<int>(vec2[i]) << " ";
+    }
+    std::cout << std::endl;
+
+    // Display the differences
+    for (size_t i = 0; i < vec2.size(); ++i) {
+        if (vec1[i] != vec2[i]) {
+            std::cout << "^ ";
+        } else {
+            std::cout << "_ ";
+        }
+    }
+    std::cout << std::endl;
+}
+
 void displayVectorDifferences(const std::vector<uint8_t>& vec1, const std::vector<uint8_t>& vec2) {
     const std::string RED = "\033[31m";
     const std::string RESET = "\033[0m";
@@ -46,3 +63,25 @@ void displayVectorDifferences(const std::vector<uint8_t>& vec1, const std::vecto
     }
     std::cout << std::endl;
 }
+
+int getIntroducedErrorCount(const std::vector<uint8_t>& vec1, const std::vector<uint8_t>& vec2) {
+    int errors = 0;
+    for (size_t i = 0; i < vec2.size(); ++i) {
+        if (vec1[i] != vec2[i]) {
+            errors++;
+        }
+    }
+    return errors;
+}
+
+// int getFixedErrorCount(const std::vector<uint8_t>& messageWithoutErrors, const std::vector<uint8_t>& messageWithErrors, const std::vector<uint8_t>& decodedMessage) {
+//     int originalErrorCount = getIntroducedErrorCount(messageWithoutErrors, messageWithErrors);
+//     std::cout << "Original error count: " << originalErrorCount << std::endl;
+//     int remainingErrors = 0;
+//     for (size_t i = 0; i < vec2.size(); ++i) {
+//         if (vec1[i] != vec2[i]) {
+//             remainingErrors++;
+//         }
+//     }
+//     return originalErrorCount - remainingErrors;
+// }

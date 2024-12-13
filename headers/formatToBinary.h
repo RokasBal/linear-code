@@ -3,8 +3,12 @@
 
 #include "matrix.h"
 #include <string>
+#include <cstdint>
+#include <fstream>
 
-std::vector<uint8_t> stringToBinary(const std::string& message);
-std::string binaryToString(const std::vector<uint8_t>& binaryVector);
+Matrix stringToBinary(const std::string& message, int length);
+std::string binaryToString(const Matrix& binaryParts);
+Matrix bmpToBinary(const std::string& filePath, int length);
+void binaryToBmp(const Matrix& binaryParts, const std::string& filePath, int width, int height, int channels);
 
 #endif // FORMATTOBINARY_H

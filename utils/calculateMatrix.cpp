@@ -3,31 +3,35 @@
 #include <random>
 
 std::vector<uint8_t> encodeMessage(const Matrix& G, const std::vector<uint8_t>& message, int k) {
-    if (message.empty() || k <= 0) {
-        throw std::invalid_argument("Invalid message or chunk size");
+    // size_t messageSize = message.size();
+    // size_t partCount = (messageSize + k - 1) / k;
+    // std::vector<uint8_t> encodedMessage;
+
+    // for (size_t i = 0; i < partCount; i++) {
+    //     std::vector<uint8_t> part;
+    //     size_t partStart = i * k;
+    //     size_t partEnd = std::min(partStart + k, messageSize);
+        
+    //     part.assign(message.begin() + partStart, message.begin() + partEnd);
+
+    //     while (part.size() < k) {
+    //         part.push_back(0);
+    //     }
+
+    //     std::vector<uint8_t> encodedPart = multiplyMatrixVector(G, part);
+        
+    //     encodedMessage.insert(encodedMessage.end(), encodedPart.begin(), encodedPart.end());
+    // }
+
+    std::vector<uint8_t> part = message;
+
+    while (part.size() < k) {
+        part.push_back(0);
     }
 
-    size_t messageSize = message.size();
-    size_t partCount = (messageSize + k - 1) / k;
-    std::vector<uint8_t> encodedMessage;
+    std::vector<uint8_t> encodedPart = multiplyMatrixVector(G, part);
 
-    for (size_t i = 0; i < partCount; i++) {
-        std::vector<uint8_t> part;
-        size_t partStart = i * k;
-        size_t partEnd = std::min(partStart + k, messageSize);
-        
-        part.assign(message.begin() + partStart, message.begin() + partEnd);
-
-        while (part.size() < k) {
-            part.push_back(0);
-        }
-
-        std::vector<uint8_t> encodedPart = multiplyMatrixVector(G, part);
-        
-        encodedMessage.insert(encodedMessage.end(), encodedPart.begin(), encodedPart.end());
-    }
-
-    return encodedMessage;
+    return encodedPart;
 }
 
 std::vector<uint8_t> multiplyMatrixVector(const Matrix& matrix, const std::vector<uint8_t>& vector) {

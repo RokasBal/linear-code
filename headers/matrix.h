@@ -4,5 +4,6 @@
 #include <vector>
 #include <cstdint>
 using Matrix = std::vector<std::vector<uint8_t>>;
+using Vec = std::vector<uint8_t>;
 
 #endif // MATRIX_H

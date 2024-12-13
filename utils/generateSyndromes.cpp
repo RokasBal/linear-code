@@ -3,53 +3,57 @@
 #include "../headers/visualization.h"
 #include <cmath>
 #include <iostream>
+#include <unordered_set>
+#include <algorithm>
 
 syndromesTable generateSyndromes(int n, int k, const Matrix& H) {
     syndromesTable syndromes;
+    std::unordered_set<std::vector<uint8_t>, VectorHash> syndromeSet;
     int calculatedSyndromes = 0;
     int syndromeCount = pow(2, n - k);
 
-    // Matrix syndromes(syndromeCount, std::vector<uint8_t>(2, 0));
+    if (syndromeCount < 0) {
+        throw std::invalid_argument("Integer overflow occurred while calculating syndrome count");
+    }
+
+    // Syndrome for zero vector
     std::vector<uint8_t> zeroCoset(n, 0);
     Matrix syndromeMatrix = multiplyMatrices(H, transposeVector(zeroCoset));
     std::vector<uint8_t> syndrome = transposeMatrix(syndromeMatrix)[0];
     syndromes.emplace_back(0, syndrome);
+    syndromeSet.insert(syndrome);
     calculatedSyndromes++;
 
-    for (int weight = 1; weight <= n && calculatedSyndromes < syndromeCount; ++weight) {
-        std::cout << "Calculating syndromes with weight " << weight << std::endl;
-        std::vector<int> positions;
+    for (int weight = 1; weight <= n; ++weight) {
+        if (calculatedSyndromes >= syndromeCount) {
+            break;
+        }
+
+        // std::cout << "Calculating syndromes with weight " << weight << std::endl;
         std::vector<std::vector<int>> combinations;
-        
-        generateCombinations(n, weight, 0, positions, combinations);
-        
-        // Create coset for each combination
+        generateCombinations(n, weight, combinations);
+
         for (const auto& combination : combinations) {
+            if (calculatedSyndromes >= syndromeCount) {
+                break;
+            }
+
+            // Generate coset
             std::vector<uint8_t> coset(n, 0);
             for (int pos : combination) {
                 coset[pos] = 1;
             }
-            
+
             // Calculate syndrome
             syndromeMatrix = multiplyMatrices(H, transposeVector(coset));
             syndrome = transposeMatrix(syndromeMatrix)[0];
-            
-            // Check if syndrome already exists
-            bool found = false;
-            for (const auto& existingSyndrome : syndromes) {
-                if (existingSyndrome.second == syndrome) {
-                    found = true;
-                    break;
-                }
-            }
-            
-            if (!found) {
+
+            // Check uniqueness
+            if (syndromeSet.find(syndrome) == syndromeSet.end()) {
                 syndromes.emplace_back(weight, syndrome);
+                syndromeSet.insert(syndrome);
                 calculatedSyndromes++;
-                std::cout << "Calculated " << calculatedSyndromes << " syndromes" << std::endl;
-                if (calculatedSyndromes == syndromeCount) {
-                    return syndromes;
-                }
+                // std::cout << "Calculated " << calculatedSyndromes << " syndromes" << std::endl;
             }
         }
     }
@@ -57,15 +61,18 @@ syndromesTable generateSyndromes(int n, int k, const Matrix& H) {
     return syndromes;
 }
 
-void generateCombinations(int n, int weight, int start, std::vector<int>& indices, std::vector<std::vector<int>>& combinations) {
-    if (indices.size() == weight) {
-        combinations.push_back(indices);
-        return;
+void generateCombinations(int n, int weight, std::vector<std::vector<int>>& combinations) {
+    std::vector<int> positions(n, 0);
+    for (int i = 0; i < weight; ++i) {
+        positions[i] = 1; // Set `weight` number of 1's
     }
-
-    for (int i = n - 1 - start; i >= 0; --i) {
-        indices.push_back(i);
-        generateCombinations(n, weight, n - i, indices, combinations);
-        indices.pop_back();
-    }
+    do {
+        std::vector<int> combination;
+        for (int i = 0; i < n; ++i) {
+            if (positions[i] == 1) {
+                combination.push_back(i);
+            }
+        }
+        combinations.push_back(combination);
+    } while (std::prev_permutation(positions.begin(), positions.end()));
 }

@@ -51,6 +51,20 @@
         "text_encoding": "cpp",
         "typeinfo": "cpp",
         "variant": "cpp",
-        "print": "cpp"
+        "print": "cpp",
+        "condition_variable": "cpp",
+        "ratio": "cpp",
+        "future": "cpp",
+        "mutex": "cpp",
+        "semaphore": "cpp",
+        "stop_token": "cpp",
+        "thread": "cpp",
+        "unordered_set": "cpp",
+        "sstream": "cpp",
+        "cinttypes": "cpp",
+        "fstream": "cpp",
+        "codecvt": "cpp",
+        "iomanip": "cpp",
+        "chrono": "cpp"
     }
 }
