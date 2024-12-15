@@ -65,7 +65,6 @@ syndromesTable generateSyndromes(int n, int k, const Matrix& H, bool showProgres
                         lastProgress = progress;
                     }
                 }
-                // std::cout << "Calculated " << calculatedSyndromes << " syndromes" << std::endl;
             }
         }
     }

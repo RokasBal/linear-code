@@ -1,6 +1,8 @@
 #ifndef USERINTERFACE_H
 #define USERINTERFACE_H
 
+// File used for handling the user interface of the program
+
 #include "matrix.h"
 #include "calculations.h"
 #include "generateMatrix.h"
@@ -13,6 +15,7 @@
 #include <string>
 #include <sstream>
 #include <filesystem>
+#include <algorithm>
 
 // Start the interface for the program
 void initializeInterface();

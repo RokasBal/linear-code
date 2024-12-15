@@ -4,7 +4,7 @@
 
 #include <chrono> // for benchmarking
 
-int maxSyndromeWeight = 25;
+int maxSyndromeWeight = 20;
 int addedBits = 0;
 bool showProgress = false;
 
@@ -42,7 +42,7 @@ void initializeInterface() {
         printf("[1] Siųsti vektorių\n");
         printf("[2] Siųsti tekstą\n");
         printf("[3] Siųsti nuotrauką\n");
-        printf("[4] Pažiūrėti parametrus\n");
+        printf("[4] Peržiūrėti parametrus\n");
         printf("[5] Atnaujinti parametrus\n");
         printf("[6] Programos nustatymai\n");
         printf("[7] Baigti darbą\n\n");
@@ -86,7 +86,7 @@ void sendVector(Matrix G, Matrix H, syndromesTable syndromes, int n, int k, doub
     Vec receivedMessage = introduceErrors(encodedMessage, errorRate);
 
     clearConsole();
-    printf("Orginalus vektorius: \n");
+    printf("Originalus vektorius: \n");
     displayVector(message);
     printf("\nUžkoduotas vektorius: \n");
     displayVector(encodedMessage);
@@ -462,23 +462,40 @@ int getUserInput(int minInput, int maxInput, std::string message) {
     while (true) {
         printf("%s", message.c_str());
         std::cin >> input;
-        if (input >= minInput && input <= maxInput) {
+        if (std::cin.fail() || input < minInput || input > maxInput) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            printf("Netinkama įvestis. Bandykite dar kartą.\n");
+        } else {
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             break;
         }
-        printf("Netinkama įvestis. Bandykite dar kartą.\n");
     }
     return input;
 }
 
 float getUserInputFloat(float minInput, float maxInput, std::string message) {
+    std::string stringInput;
     float input;
     while (true) {
         printf("%s", message.c_str());
-        std::cin >> input;
-        if (input >= minInput && input <= maxInput) {
-            break;
+        std::cin >> stringInput;
+        std::replace(stringInput.begin(), stringInput.end(), ',', '.');
+        try {
+            input = std::stof(stringInput);
+            if (input >= minInput && input <= maxInput) {
+                break;
+            } else {
+                printf("Netinkama įvestis. Bandykite dar kartą.\n");
+            }
+        } catch (const std::invalid_argument&) {
+            printf("Netinkama įvestis. Bandykite dar kartą.\n");
+        } catch (const std::out_of_range&) {
+            printf("Netinkama įvestis. Bandykite dar kartą.\n");
         }
-        printf("Netinkama įvestis. Bandykite dar kartą.\n");
+
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
     return input;
 }

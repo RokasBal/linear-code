@@ -3,33 +3,15 @@
 #include <random>
 
 Vec encodeMessage(const Matrix& G, const Vec& message, int k, int* addedBits) {
-    // size_t messageSize = message.size();
-    // size_t partCount = (messageSize + k - 1) / k;
-    // std::vector<uint8_t> encodedMessage;
-
-    // for (size_t i = 0; i < partCount; i++) {
-    //     std::vector<uint8_t> part;
-    //     size_t partStart = i * k;
-    //     size_t partEnd = std::min(partStart + k, messageSize);
-        
-    //     part.assign(message.begin() + partStart, message.begin() + partEnd);
-
-    //     while (part.size() < k) {
-    //         part.push_back(0);
-    //     }
-
-    //     std::vector<uint8_t> encodedPart = multiplyMatrixVector(G, part);
-        
-    //     encodedMessage.insert(encodedMessage.end(), encodedPart.begin(), encodedPart.end());
-    // }
-
     Vec part = message;
 
+    // If part does not have enough bits, add 0 bits to the end
     while (part.size() < k) {
         part.push_back(0);
         *addedBits += 1;
     }
 
+    // Encode the part
     Vec encodedPart = multiplyMatrixVector(G, part);
 
     return encodedPart;
@@ -39,12 +21,15 @@ Vec multiplyMatrixVector(const Matrix& matrix, const Vec& vector) {
     size_t rows = matrix.size();
     size_t cols = matrix[0].size();
 
+    // Error that was mostly used for debugging purposes
+    // Checks that the matrix and vector have the correct dimensions for multiplication
     if (rows == 0 || cols == 0 || vector.size() != rows) {
         throw std::invalid_argument("Invalid dimensions for matrix-vector multiplication");
     }
 
     Vec result(cols, 0);
 
+    // Multiply the matrix and vector
     for (size_t i = 0; i < rows; ++i) {
         for (size_t j = 0; j < cols; ++j) {
             result[j] ^= (vector[i] & matrix[i][j]);
@@ -59,6 +44,8 @@ Matrix multiplyMatrices(const Matrix& matrix1, const Matrix& matrix2) {
     size_t cols = matrix2[0].size();
     size_t common = matrix2.size();
 
+    // Error that was mostly used for debugging purposes
+    // Checks that the matrices have the correct dimensions for multiplication
     if (rows == 0 || cols == 0 || common != matrix1[0].size()) {
         throw std::invalid_argument("Invalid dimensions for matrix-matrix multiplication");
     }
@@ -79,9 +66,10 @@ Matrix multiplyMatrices(const Matrix& matrix1, const Matrix& matrix2) {
 }
 
 std::vector<uint8_t> introduceErrors(const Vec& vector, double errorRate) {
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<> dis(0.0, 1.0);
+    // Random number generator for introducing errors
+    std::random_device rd;  // Gets random seed
+    std::mt19937 gen(rd()); // Mersenne Twister 19937 generator
+    std::uniform_real_distribution<> dis(0.0, 1.0); // Uniform distribution between 0 and 1
 
     // Create copy of input vector
     Vec result = vector;
