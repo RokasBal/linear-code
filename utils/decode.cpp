@@ -1,5 +1,5 @@
 #include "../headers/decode.h"
-#include "../headers/matrixMath.h"
+#include "../headers/calculations.h"
 #include <stdexcept>
 #include <iostream>
 #include <print>
@@ -126,73 +126,4 @@ std::vector<uint8_t> decodeMessage(const Matrix& H, const std::vector<uint8_t>& 
 
     message.resize(message.size() - encodeLength);
     return message;
-}
-
-std::vector<uint8_t> decodeBmpMessage(const Matrix& H, const std::vector<uint8_t>& receivedMessage, syndromesTable syndromes, int n, int k) {
-    if (receivedMessage.size() <= 54) {
-        throw std::invalid_argument("Received BMP data is too small to contain a valid header");
-    }
-
-    std::vector<uint8_t> decodedMessage(receivedMessage.begin(), receivedMessage.begin() + 54);
-
-    std::vector<uint8_t> imageData(receivedMessage.begin() + 54, receivedMessage.end());
-    size_t partSize = n;
-    size_t messageSize = imageData.size();
-    size_t partCount = (messageSize + partSize - 1) / partSize;
-    size_t encodeLength = n - k;
-
-    for (size_t i = 0; i < partCount; ++i) {
-        std::vector<uint8_t> part;
-        size_t partStart = i * n;
-        size_t partEnd = std::min(partStart + partSize, messageSize);
-        
-        part.assign(imageData.begin() + partStart, imageData.begin() + partEnd);
-
-        int cosetWeight = -1;
-        for (int j = 0; j < partSize; ++j) {
-            Matrix syndrome = multiplyMatrices(H, transposeVector(part));
-            std::vector<uint8_t> syndromeVector = transposeMatrix(syndrome)[0];
-
-            int weight = -1;
-            for (const auto& [w, s] : syndromes) {
-                if (s == syndromeVector) {
-                    weight = w;
-                    break;
-                }
-            }
-            
-            if (weight == -1) {
-                throw std::runtime_error("Syndrome not found in table");
-            } else if (weight == 0) {
-                cosetWeight = 0;
-                break;
-            } else {
-                std::vector<uint8_t> tempPart = part;
-                tempPart[j] ^= 1; // Flip the bit
-                Matrix tempSyndrome = multiplyMatrices(H, transposeVector(tempPart));
-                std::vector<uint8_t> tempSyndromeVector = transposeMatrix(tempSyndrome)[0];
-                int tempWeight = -1;
-                for (const auto& [w, s] : syndromes) {
-                    if (s == tempSyndromeVector) {
-                        tempWeight = w;
-                        break;
-                    }
-                }
-                if (tempWeight == -1) {
-                    throw std::runtime_error("Syndrome not found in table");
-                } else if (tempWeight == 0) {
-                    part = tempPart;
-                    break;
-                } else if (tempWeight < weight) {
-                    part = tempPart;
-                    weight = tempWeight;
-                    cosetWeight = tempWeight;
-                }
-            }
-        }
-        
-        decodedMessage.insert(decodedMessage.end(), part.begin(), part.end() - encodeLength);
-    }
-
-    return decodedMessage;
 }

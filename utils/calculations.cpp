@@ -1,8 +1,8 @@
-#include "../headers/matrixMath.h"
+#include "../headers/calculations.h"
 #include <iostream>
 #include <random>
 
-std::vector<uint8_t> encodeMessage(const Matrix& G, const std::vector<uint8_t>& message, int k) {
+Vec encodeMessage(const Matrix& G, const Vec& message, int k, int* addedBits) {
     // size_t messageSize = message.size();
     // size_t partCount = (messageSize + k - 1) / k;
     // std::vector<uint8_t> encodedMessage;
@@ -23,26 +23,30 @@ std::vector<uint8_t> encodeMessage(const Matrix& G, const std::vector<uint8_t>& 
     //     encodedMessage.insert(encodedMessage.end(), encodedPart.begin(), encodedPart.end());
     // }
 
-    std::vector<uint8_t> part = message;
+    Vec part = message;
 
     while (part.size() < k) {
         part.push_back(0);
+        *addedBits += 1;
     }
 
-    std::vector<uint8_t> encodedPart = multiplyMatrixVector(G, part);
+    Vec encodedPart = multiplyMatrixVector(G, part);
 
     return encodedPart;
 }
 
-std::vector<uint8_t> multiplyMatrixVector(const Matrix& matrix, const std::vector<uint8_t>& vector) {
-    if (matrix.empty() || matrix[0].empty() || vector.size() != matrix.size()) {
+Vec multiplyMatrixVector(const Matrix& matrix, const Vec& vector) {
+    size_t rows = matrix.size();
+    size_t cols = matrix[0].size();
+
+    if (rows == 0 || cols == 0 || vector.size() != rows) {
         throw std::invalid_argument("Invalid dimensions for matrix-vector multiplication");
     }
 
-    std::vector<uint8_t> result(matrix[0].size(), 0);
+    Vec result(cols, 0);
 
-    for (size_t j = 0; j < matrix[0].size(); j++) {
-        for (size_t i = 0; i < vector.size(); i++) {
+    for (size_t i = 0; i < rows; ++i) {
+        for (size_t j = 0; j < cols; ++j) {
             result[j] ^= (vector[i] & matrix[i][j]);
         }
     }
@@ -55,12 +59,18 @@ Matrix multiplyMatrices(const Matrix& matrix1, const Matrix& matrix2) {
     size_t cols = matrix2[0].size();
     size_t common = matrix2.size();
 
+    if (rows == 0 || cols == 0 || common != matrix1[0].size()) {
+        throw std::invalid_argument("Invalid dimensions for matrix-matrix multiplication");
+    }
+
     Matrix result(rows, std::vector<uint8_t>(cols, 0));
 
-    for (size_t i = 0; i < rows; i++) {
-        for (size_t j = 0; j < cols; j++) {
-            for (size_t k = 0; k < common; k++) {
-                result[i][j] ^= (matrix1[i][k] & matrix2[k][j]);
+    for (size_t i = 0; i < rows; ++i) {
+        for (size_t k = 0; k < common; ++k) {
+            uint8_t multiplier = matrix1[i][k];
+            if (multiplier == 0) continue; 
+            for (size_t j = 0; j < cols; ++j) {
+                result[i][j] ^= (multiplier & matrix2[k][j]);
             }
         }
     }
@@ -68,17 +78,13 @@ Matrix multiplyMatrices(const Matrix& matrix1, const Matrix& matrix2) {
     return result;
 }
 
-std::vector<uint8_t> introduceErrors(const std::vector<uint8_t>& vector, double errorRate) {
-    if (errorRate < 0 || errorRate >= 1) {
-        throw std::invalid_argument("Error rate must be between 0 and 1");
-    }
-
+std::vector<uint8_t> introduceErrors(const Vec& vector, double errorRate) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dis(0.0, 1.0);
 
     // Create copy of input vector
-    std::vector<uint8_t> result = vector;
+    Vec result = vector;
 
     for (size_t i = 0; i < result.size(); i++) {
         if (dis(gen) < errorRate) {
@@ -103,8 +109,8 @@ Matrix transposeMatrix(const Matrix& matrix) {
     return transposed;
 }
 
-Matrix transposeVector(const std::vector<uint8_t>& vector) {
-    Matrix transposed(vector.size(), std::vector<uint8_t>(1));
+Matrix transposeVector(const Vec& vector) {
+    Matrix transposed(vector.size(), Vec(1));
     for (size_t i = 0; i < vector.size(); ++i) {
         transposed[i][0] = vector[i];
     }

@@ -1,16 +1,19 @@
 #include "../headers/generateSyndromes.h"
-#include "../headers/matrixMath.h"
+#include "../headers/calculations.h"
 #include "../headers/visualization.h"
 #include <cmath>
 #include <iostream>
 #include <unordered_set>
 #include <algorithm>
 
-syndromesTable generateSyndromes(int n, int k, const Matrix& H) {
+syndromesTable generateSyndromes(int n, int k, const Matrix& H, bool showProgress) {
     syndromesTable syndromes;
     std::unordered_set<std::vector<uint8_t>, VectorHash> syndromeSet;
     int calculatedSyndromes = 0;
     int syndromeCount = pow(2, n - k);
+
+    int progressUpdateInterval = 5;
+    int lastProgress = 0;
 
     if (syndromeCount < 0) {
         throw std::invalid_argument("Integer overflow occurred while calculating syndrome count");
@@ -53,6 +56,15 @@ syndromesTable generateSyndromes(int n, int k, const Matrix& H) {
                 syndromes.emplace_back(weight, syndrome);
                 syndromeSet.insert(syndrome);
                 calculatedSyndromes++;
+
+                if (showProgress) {
+                    int progress = static_cast<int>(calculatedSyndromes * 100 / syndromeCount);
+                    if (progress >= lastProgress + progressUpdateInterval) {
+                        printf("Progresas: %d%%\r", progress);
+                        fflush(stdout);
+                        lastProgress = progress;
+                    }
+                }
                 // std::cout << "Calculated " << calculatedSyndromes << " syndromes" << std::endl;
             }
         }
@@ -64,7 +76,7 @@ syndromesTable generateSyndromes(int n, int k, const Matrix& H) {
 void generateCombinations(int n, int weight, std::vector<std::vector<int>>& combinations) {
     std::vector<int> positions(n, 0);
     for (int i = 0; i < weight; ++i) {
-        positions[i] = 1; // Set `weight` number of 1's
+        positions[i] = 1;
     }
     do {
         std::vector<int> combination;

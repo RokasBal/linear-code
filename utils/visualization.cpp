@@ -74,6 +74,14 @@ int getIntroducedErrorCount(const std::vector<uint8_t>& vec1, const std::vector<
     return errors;
 }
 
+void clearConsole() {
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
+}
+
 // int getFixedErrorCount(const std::vector<uint8_t>& messageWithoutErrors, const std::vector<uint8_t>& messageWithErrors, const std::vector<uint8_t>& decodedMessage) {
 //     int originalErrorCount = getIntroducedErrorCount(messageWithoutErrors, messageWithErrors);
 //     std::cout << "Original error count: " << originalErrorCount << std::endl;
