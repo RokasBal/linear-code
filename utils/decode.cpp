@@ -2,7 +2,6 @@
 #include "../headers/calculations.h"
 #include <stdexcept>
 #include <iostream>
-#include <print>
 
 std::vector<uint8_t> decodeMessage(const Matrix& H, const std::vector<uint8_t>& receivedMessage, syndromesTable syndromes, int n, int k) {
     size_t encodeLength = n - k;

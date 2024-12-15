@@ -4,7 +4,7 @@
 
 #include <chrono> // for benchmarking
 
-int maxSyndromeWeight = 20;
+int maxSyndromeWeight = 25;
 int addedBits = 0;
 bool showProgress = false;
 
@@ -373,7 +373,6 @@ void showParameters(Matrix G, Matrix H, int n, int k, double errorRate, syndrome
             printf("Generuojanti matrica G:\n");
             displayMatrix(G);
             printf("\nSpauskite Enter norint sugrįžti...");
-            std::cin.ignore();
             std::cin.get();
             break;
         case 2:
@@ -381,7 +380,6 @@ void showParameters(Matrix G, Matrix H, int n, int k, double errorRate, syndrome
             printf("Pasitikrinimo matrica H:\n");
             displayMatrix(H);
             printf("\nSpauskite Enter norint sugrįžti...");
-            std::cin.ignore();
             std::cin.get();
             break;
         case 3:
@@ -392,7 +390,6 @@ void showParameters(Matrix G, Matrix H, int n, int k, double errorRate, syndrome
             printf("Sugeneruoti sindromai:\n");
             displaySyndromes(syndromes);
             printf("\nSpauskite Enter norint sugrįžti...");
-            std::cin.ignore();
             std::cin.get();
             break;
         case 5:
@@ -408,7 +405,7 @@ void printProgramParameters(int n, int k, double errorRate) {
     printf("Klaidos procentas: %f\n", errorRate);
     printf("Didžiausias galimas skirtumas: %d\n", maxSyndromeWeight);
     printf("\nSpauskite Enter norint sugrįžti...");
-    std::cin.ignore(); 
+    // std::cin.ignore(); 
     std::cin.get();   
     return;
 }
@@ -417,7 +414,7 @@ void getGenerativeMatrixSize(int* n, int* k) {
     clearConsole();
     while(true) {
         *n = getUserInput(1, 64, "Įveskite matricos ilgį (n): ");
-        *k = getUserInput(1, *n, "Įveskite matricjos dimensiją (k <= n): ");
+        *k = getUserInput(1, *n - 1, "Įveskite matricjos dimensiją (k < n): ");
         if (*n - *k >= maxSyndromeWeight) {
             printf("Skirtumas tarp k ir n perdidelis.\n", maxSyndromeWeight); // TODO - UPDATE
         } else {

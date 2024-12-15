@@ -87,3 +87,13 @@ Matrix generateUserMatrix(int k, int n) {
 
     return matrix;
 }
+
+Vec generateRandomVector(int size) {
+    Vec vector(size, 0);
+
+    for (int i = 0; i < size; i++) {
+        vector[i] = static_cast<uint8_t>(std::rand() % 2);
+    }
+
+    return vector;
+}
