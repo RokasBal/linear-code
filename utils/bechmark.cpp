@@ -3,6 +3,7 @@
 void benchmark(int minN, int maxN, int minK, int maxK, double errorRate) {
     int bits = 0;
     std::vector<std::tuple<int, int, double, double, int>> results;
+    int iterations = 200;
 
     for (int n = minN; n <= maxN; ++n) {
         for (int k = minK; k <= std::min(n, maxK); ++k) {
@@ -12,32 +13,41 @@ void benchmark(int minN, int maxN, int minK, int maxK, double errorRate) {
             try {
                 Matrix G = generateRandomMatrix(k, n);
                 Matrix H = generateParityMatrix(G);
-                // std::cout <<"Generating syndromes for n=" << n << ", k=" << k << std::endl;
-                auto startSyndrome = std::chrono::high_resolution_clock::now();
-                syndromesTable syndromes = generateSyndromes(n, k, H, false);
-                auto endSyndrome = std::chrono::high_resolution_clock::now();
-                std::chrono::duration<double> syndromeDuration = endSyndrome - startSyndrome;
-                // std::cout << "Generating message for n=" << n << ", k=" << k << std::endl;
+                
+                // Run the encoding/decoding process for the specified number of iterations
+                double totalEncodeTime = 0.0;
+                double totalSyndromeTime = 0.0;
+                int totalErrorsLeft = 0;
 
-                Vec message = generateRandomVector(k);
-                Vec encodedMessage;
-                Vec receivedMessage;
-                Vec decodedMessage;
+                for (int i = 0; i < iterations; ++i) {
+                    auto startSyndrome = std::chrono::high_resolution_clock::now();
+                    syndromesTable syndromes = generateSyndromes(n, k, H, false);
+                    auto endSyndrome = std::chrono::high_resolution_clock::now();
+                    std::chrono::duration<double> syndromeDuration = endSyndrome - startSyndrome;
+                    totalSyndromeTime += syndromeDuration.count();
 
-                // std::cout << "Matrix G dimensions: " << G.size() << "x" << (G.empty() ? 0 : G[0].size()) << std::endl;
-                // std::cout << "Matrix H dimensions: " << H.size() << "x" << (H.empty() ? 0 : H[0].size()) << std::endl;
-                // std::cout << "Message vector size: " << message.size() << std::endl;
+                    Vec message = generateRandomVector(k);
+                    Vec encodedMessage;
+                    Vec receivedMessage;
+                    Vec decodedMessage;
 
-                auto start = std::chrono::high_resolution_clock::now();
-                encodedMessage = encodeMessage(G, message, k, &bits);
-                receivedMessage = introduceErrors(encodedMessage, errorRate);
-                decodedMessage = decodeMessage(H, receivedMessage, syndromes, n, k);
-                auto end = std::chrono::high_resolution_clock::now();
-                std::chrono::duration<double> encodeDuration = end - start;
+                    auto start = std::chrono::high_resolution_clock::now();
+                    encodedMessage = encodeMessage(G, message, k, &bits);
+                    receivedMessage = introduceErrors(encodedMessage, errorRate);
+                    decodedMessage = decodeMessage(H, receivedMessage, syndromes, n, k);
+                    auto end = std::chrono::high_resolution_clock::now();
+                    std::chrono::duration<double> encodeDuration = end - start;
+                    totalEncodeTime += encodeDuration.count();
 
-                int errorsLeft = getIntroducedErrorCount(message, decodedMessage);
+                    int errorsLeft = getIntroducedErrorCount(message, decodedMessage);
+                    totalErrorsLeft += errorsLeft;
+                }
 
-                results.emplace_back(n, k, encodeDuration.count(), syndromeDuration.count(), errorsLeft);
+                double avgEncodeTime = totalEncodeTime / iterations;
+                double avgSyndromeTime = totalSyndromeTime / iterations;
+                int avgErrorsLeft = totalErrorsLeft / iterations;
+
+                results.emplace_back(n, k, avgEncodeTime, avgSyndromeTime, avgErrorsLeft);
             } catch (const std::invalid_argument& e) {
                 std::cerr << "Error: " << e.what() << " for n=" << n << ", k=" << k << std::endl;
             }
