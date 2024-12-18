@@ -2,32 +2,37 @@
 #include <iostream>
 #include <random>
 
+// Encodes the message or it's part using the generative matrix
 Vec encodeMessage(const Matrix& G, const Vec& message, int k, int* addedBits) {
     Vec part = message;
 
     // If part does not have enough bits, add 0 bits to the end
+    // Also keep track of the added bits for removal post decode
     while (part.size() < k) {
         part.push_back(0);
         *addedBits += 1;
     }
 
     // Encode the part
-    Vec encodedPart = multiplyMatrixVector(G, part);
+    Vec encodedPart;
+    multiplyMatrixVector(G, part, encodedPart);
 
     return encodedPart;
 }
 
-Vec multiplyMatrixVector(const Matrix& matrix, const Vec& vector) {
+// Functions used for multiplying matrices and vectors
+
+void multiplyMatrixVector(const Matrix& matrix, const Vec& vector, Vec& result) {
     size_t rows = matrix.size();
     size_t cols = matrix[0].size();
 
-    // Error that was mostly used for debugging purposes
-    // Checks that the matrix and vector have the correct dimensions for multiplication
+    // Check dimensions
     if (rows == 0 || cols == 0 || vector.size() != rows) {
         throw std::invalid_argument("Invalid dimensions for matrix-vector multiplication");
     }
 
-    Vec result(cols, 0);
+    // Initialize the result vector to the correct size
+    result.resize(cols, 0);
 
     // Multiply the matrix and vector
     for (size_t i = 0; i < rows; ++i) {
@@ -35,23 +40,21 @@ Vec multiplyMatrixVector(const Matrix& matrix, const Vec& vector) {
             result[j] ^= (vector[i] & matrix[i][j]);
         }
     }
-
-    return result;
 }
 
-Matrix multiplyMatrices(const Matrix& matrix1, const Matrix& matrix2) {
+void multiplyMatrices(const Matrix& matrix1, const Matrix& matrix2, Matrix& result) {
     size_t rows = matrix1.size();
     size_t cols = matrix2[0].size();
     size_t common = matrix2.size();
 
-    // Error that was mostly used for debugging purposes
-    // Checks that the matrices have the correct dimensions for multiplication
-    if (rows == 0 || cols == 0 || common != matrix1[0].size()) {
-        throw std::invalid_argument("Invalid dimensions for matrix-matrix multiplication");
-    }
+    // if (rows == 0 || cols == 0 || common != matrix1[0].size()) {
+    //     throw std::invalid_argument("Invalid dimensions for matrix-matrix multiplication");
+    // }
 
-    Matrix result(rows, std::vector<uint8_t>(cols, 0));
+    // Initialize the result matrix to the correct size with all elements set to 0
+    result.assign(rows, std::vector<uint8_t>(cols, 0));
 
+    // Multiply the matrices
     for (size_t i = 0; i < rows; ++i) {
         for (size_t k = 0; k < common; ++k) {
             uint8_t multiplier = matrix1[i][k];
@@ -61,8 +64,6 @@ Matrix multiplyMatrices(const Matrix& matrix1, const Matrix& matrix2) {
             }
         }
     }
-
-    return result;
 }
 
 std::vector<uint8_t> introduceErrors(const Vec& vector, double errorRate) {
@@ -83,24 +84,35 @@ std::vector<uint8_t> introduceErrors(const Vec& vector, double errorRate) {
     return result;
 }
 
-Matrix transposeMatrix(const Matrix& matrix) {
+void transposeMatrix(const Matrix& matrix, Matrix& result) {
     size_t rows = matrix.size();
     size_t cols = matrix[0].size();
-    Matrix transposed(cols, std::vector<uint8_t>(rows));
+    
+    result.assign(cols, std::vector<uint8_t>(rows));
 
     for (size_t i = 0; i < rows; ++i) {
         for (size_t j = 0; j < cols; ++j) {
-            transposed[j][i] = matrix[i][j];
+            result[j][i] = matrix[i][j];
         }
     }
-
-    return transposed;
 }
 
-Matrix transposeVector(const Vec& vector) {
-    Matrix transposed(vector.size(), Vec(1));
+void transposeVector(const Vec& vector, Matrix& result) {
+    result.assign(vector.size(), Vec(1));
     for (size_t i = 0; i < vector.size(); ++i) {
-        transposed[i][0] = vector[i];
+        result[i][0] = vector[i];
     }
-    return transposed;
+}
+
+void transposeMatrixToVector(const Matrix& matrix, Vec& result) {
+    // if (matrix.empty() || matrix[0].size() != 1) {
+    //     throw std::invalid_argument("Invalid matrix dimensions for transposing to vector");
+    // }
+    
+    size_t rows = matrix.size();
+    result.resize(rows);
+    
+    for (size_t i = 0; i < rows; ++i) {
+        result[i] = matrix[i][0];
+    }
 }

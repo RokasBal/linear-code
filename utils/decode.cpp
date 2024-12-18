@@ -4,19 +4,24 @@
 #include <iostream>
 
 std::vector<uint8_t> decodeMessage(const Matrix& H, const std::vector<uint8_t>& receivedMessage, syndromesTable syndromes, int n, int k) {
-    size_t encodeLength = n - k;
+    size_t encodeLength = n - k; // Get the length of the message part that was added during encoding
     Vec message = receivedMessage;
 
-    int cosetWeight = -1;
+    int cosetWeight = -1; // Initialize the coset weight to -1 to allow checking for problems with syndrome generation
     for (int j = 0; j < n; ++j) {
         // Calculate syndrome for message or it's part
-        Matrix syndrome = multiplyMatrices(H, transposeVector(message));
-        std::vector<uint8_t> syndromeVector = transposeMatrix(syndrome)[0];
+        Matrix syndrome;
+        Matrix messageT;
+        transposeVector(message, messageT);
+        multiplyMatrices(H, messageT, syndrome);
+        Vec syndromeVector;
+        transposeMatrixToVector(syndrome, syndromeVector);
 
         // Find the coresponding weight for the syndrome based on generated syndromes
-        int weight = -1;
+        int weight = -1; // Set the weight to -1 to allow checking for problems with syndrome generation
         for (const auto& [w, s] : syndromes) {
             if (s == syndromeVector) {
+                // Once corresponding syndrome is found - set the weight and stop the loop
                 weight = w;
                 break;
             }
@@ -33,20 +38,29 @@ std::vector<uint8_t> decodeMessage(const Matrix& H, const std::vector<uint8_t>& 
         } else {
             // Otherwise continue finding the lowest weight, flipping bits in the part
             Vec tempPart = message;
-            tempPart[j] ^= 1; // Flip the bit
+            tempPart[j] ^= 1; // Flip the bit at position j
 
             // Calculate syndrome for part with flipped bit
-            Matrix tempSyndrome = multiplyMatrices(H, transposeVector(tempPart));
-            Vec tempSyndromeVector = transposeMatrix(tempSyndrome)[0];
-            int tempWeight = -1;
+            Matrix tempSyndrome;
+            Matrix tempPartT;
+            transposeVector(tempPart, tempPartT);
+            multiplyMatrices(H, tempPartT, tempSyndrome);
+            Vec tempSyndromeVector;
+            transposeMatrixToVector(tempSyndrome, tempSyndromeVector);
+
+            int tempWeight = -1; // Initialize the weight to -1 to allow checking for problems with syndrome generation
             // Get weight corresponding to the syndrome
             for (const auto& [w, s] : syndromes) {
                 if (s == tempSyndromeVector) {
+                    // Once corresponding syndrome is found - set the weight and stop the loop
                     tempWeight = w;
                     break;
                 }
             }
+
             if (tempWeight == -1) {
+                // Throw error if syndrome is not found
+                // If this happens - syndrome generation is not working correctly
                 throw std::runtime_error("Syndrome not found in table");
             } else if (tempWeight == 0) {
                 // If weight 0 - errors are corrected, set message to new part with flipped bits, end decoding.
@@ -60,6 +74,7 @@ std::vector<uint8_t> decodeMessage(const Matrix& H, const std::vector<uint8_t>& 
                 cosetWeight = tempWeight;
             } else {
                 // Otherwise continue decoding without the flipped bit
+                continue;
             }
         }
     }

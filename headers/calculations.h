@@ -9,12 +9,13 @@
 Vec encodeMessage(const Matrix& G, const Vec& message, int k, int* addedBits);
 
 // Functions used for transposing matrices and vectors
-Matrix transposeVector(const Vec& vector);
-Matrix transposeMatrix(const Matrix& matrix);
+void transposeMatrix(const Matrix& matrix, Matrix& result);
+void transposeVector(const Vec& vector, Matrix& result);
+void transposeMatrixToVector(const Matrix& matrix, Vec& result);
 
 // Functions used for multiplying matrices and vectors
-Vec multiplyMatrixVector(const Matrix& matrix, const Vec& vector);
-Matrix multiplyMatrices(const Matrix& matrix1, const Matrix& matrix2);
+void multiplyMatrixVector(const Matrix& matrix, const Vec& vector, Vec& result) ;
+void multiplyMatrices(const Matrix& matrix1, const Matrix& matrix2, Matrix& result);
 
 std::vector<uint8_t> introduceErrors(const Vec& vector, double errorRate);
 

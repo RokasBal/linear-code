@@ -18,11 +18,13 @@ void generateCombinations(int n, int weight, std::vector<std::vector<int>>& comb
 // Hash function, used to store syndromes in an unordered_set
 struct VectorHash {
     std::size_t operator()(const std::vector<uint8_t>& v) const {
-        std::size_t hash = 0;
+        uint64_t ret = 0;
         for (uint8_t i : v) {
-            hash ^= std::hash<uint8_t>{}(i) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+            ret |= i;
+            ret <<= 1;
         }
-        return hash;
+        ret ^= ret >> 33;  // Final mixing step (like in MurmurHash)
+        return ret;
     }
 };
 

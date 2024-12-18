@@ -3,36 +3,42 @@
 #include "../headers/visualization.h"
 #include <cmath>
 #include <iostream>
-#include <unordered_set>
+#include <unordered_map>
 #include <algorithm>
 
 syndromesTable generateSyndromes(int n, int k, const Matrix& H, bool showProgress) {
-    syndromesTable syndromes;
-    std::unordered_set<std::vector<uint8_t>, VectorHash> syndromeSet;
+    syndromesTable syndromes; // Vector for storing generated syndromes for returning
+    std::unordered_map<std::vector<uint8_t>, int, VectorHash> syndromeMap; // Map for storing unique syndromes
+    int syndromeCount = pow(2, n - k); // Calculate the amount of syndromes to generate
     int calculatedSyndromes = 0;
-    int syndromeCount = pow(2, n - k);
 
     int progressUpdateInterval = 5;
     int lastProgress = 0;
 
+    // Check for integer overflow
     if (syndromeCount < 0) {
         throw std::invalid_argument("Integer overflow occurred while calculating syndrome count");
     }
 
-    // Syndrome for zero vector
-    std::vector<uint8_t> zeroCoset(n, 0);
-    Matrix syndromeMatrix = multiplyMatrices(H, transposeVector(zeroCoset));
-    std::vector<uint8_t> syndrome = transposeMatrix(syndromeMatrix)[0];
+    // Get syndrome for zero coset
+    Vec zeroCoset(n, 0);
+    Matrix syndromeMatrix;
+    Matrix cosetTransposed;
+    transposeVector(zeroCoset, cosetTransposed);
+    multiplyMatrices(H, cosetTransposed, syndromeMatrix);
+    Vec syndrome;
+    transposeMatrixToVector(syndromeMatrix, syndrome);
     syndromes.emplace_back(0, syndrome);
-    syndromeSet.insert(syndrome);
+    syndromeMap[syndrome] = 0;
     calculatedSyndromes++;
 
+    // Generate syndromes with weight from 1 to n
     for (int weight = 1; weight <= n; ++weight) {
+        // Break if all syndromes are generated
         if (calculatedSyndromes >= syndromeCount) {
             break;
         }
 
-        // std::cout << "Calculating syndromes with weight " << weight << std::endl;
         std::vector<std::vector<int>> combinations;
         generateCombinations(n, weight, combinations);
 
@@ -48,13 +54,15 @@ syndromesTable generateSyndromes(int n, int k, const Matrix& H, bool showProgres
             }
 
             // Calculate syndrome
-            syndromeMatrix = multiplyMatrices(H, transposeVector(coset));
-            syndrome = transposeMatrix(syndromeMatrix)[0];
+            Matrix cosetT;
+            transposeVector(coset, cosetT);
+            multiplyMatrices(H, cosetT, syndromeMatrix);
+            transposeMatrixToVector(syndromeMatrix, syndrome);
 
             // Check uniqueness
-            if (syndromeSet.find(syndrome) == syndromeSet.end()) {
+            if (syndromeMap.find(syndrome) == syndromeMap.end()) {
                 syndromes.emplace_back(weight, syndrome);
-                syndromeSet.insert(syndrome);
+                syndromeMap[syndrome] = weight;
                 calculatedSyndromes++;
 
                 if (showProgress) {
@@ -74,16 +82,23 @@ syndromesTable generateSyndromes(int n, int k, const Matrix& H, bool showProgres
 
 void generateCombinations(int n, int weight, std::vector<std::vector<int>>& combinations) {
     std::vector<int> positions(n, 0);
+
+    // Set the first weight positions to 1
     for (int i = 0; i < weight; ++i) {
         positions[i] = 1;
     }
+
+    // Generate all combinations of positions using std::prev_permutation
     do {
         std::vector<int> combination;
+        // Go trough the positions vector and collect locations where value is 1
         for (int i = 0; i < n; ++i) {
             if (positions[i] == 1) {
                 combination.push_back(i);
             }
         }
+        // Add the generated combination to the list of combinations
         combinations.push_back(combination);
+    // Continue generating possible combinations until all are generated
     } while (std::prev_permutation(positions.begin(), positions.end()));
 }
