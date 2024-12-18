@@ -5,15 +5,7 @@
 
 #include "matrix.h"
 #include <vector>
-
-// Set syndromeTable type for simpler code
-using syndromesTable = std::vector<std::pair<int, std::vector<uint8_t>>>;
-
-// Function for generating syndromes
-syndromesTable generateSyndromes(int n, int k, const Matrix& H, bool showProgress);
-
-// Function for generating all combinations for a given weight and length
-void generateCombinations(int n, int weight, std::vector<std::vector<int>>& combinations);
+#include <unordered_map>
 
 // Hash function, used to store syndromes in an unordered_set
 struct VectorHash {
@@ -23,9 +15,17 @@ struct VectorHash {
             ret |= i;
             ret <<= 1;
         }
-        ret ^= ret >> 33;  // Final mixing step (like in MurmurHash)
         return ret;
     }
 };
+
+// Set syndromeTable type for simpler code
+using syndromesTable = std::unordered_map<std::vector<uint8_t>, int, VectorHash>;
+
+// Function for generating syndromes
+syndromesTable generateSyndromes(int n, int k, const Matrix& H, bool showProgress);
+
+// Function for generating all combinations for a given weight and length
+void generateCombinations(int n, int weight, std::vector<std::vector<int>>& combinations);
 
 #endif // GENERATESYNDROMES_H

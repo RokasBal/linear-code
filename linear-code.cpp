@@ -16,21 +16,21 @@ int main() {
 #endif
 
     // std::cout << "benchmark 1 - 0.01" << std::endl;
-    // benchmark(1, 25, 1, 25, 0.01);
+    // benchmark(1, 20, 1, 20, 0.01);
     // std::cout << "benchmark 1 - 0.025" << std::endl;
-    // benchmark(1, 25, 1, 25, 0.025);
+    // benchmark(1, 20, 1, 20, 0.025);
     // std::cout << "benchmark 1 - 0.05" << std::endl;
-    // benchmark(1, 25, 1, 25, 0.05);
+    // benchmark(1, 20, 1, 20, 0.05);
     // std::cout << "benchmark 2 - 0.1" << std::endl;
-    // benchmark(1, 25, 1, 25, 0.1);
+    // benchmark(1, 20, 1, 20, 0.1);
     // std::cout << "benchmark 2 - 0.15" << std::endl;
-    // benchmark(1, 25, 1, 25, 0.15);
+    // benchmark(1, 20, 1, 20, 0.15);
     // std::cout << "benchmark 2 - 0.25" << std::endl;
-    // benchmark(1, 25, 1, 25, 0.25);
+    // benchmark(1, 20, 1, 20, 0.25);
     // std::cout << "benchmark 2 - 0.4" << std::endl;
-    // benchmark(1, 25, 1, 25, 0.4);
+    // benchmark(1, 20, 1, 20, 0.4);
     // std::cout << "benchmark 2 - 0.5" << std::endl;
-    // benchmark(1, 25, 1, 25, 0.5);
+    // benchmark(1, 20, 1, 20, 0.5);
     initializeInterface();
 
     return 0;

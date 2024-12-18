@@ -137,8 +137,16 @@ void sendMessage(Matrix G, Matrix H, syndromesTable syndromes, int n, int k, dou
 
     // Get the message to send
     std::string message;
+    std::string line;
     printf("Įrašykite tekstą siuntimui: ");
-    std::getline(std::cin >> std::ws, message);
+    // Read multiple lines of input
+    while (true) {
+        std::getline(std::cin, line);
+        if (line.empty()) {
+            break;
+        }
+        message += line + "\n";
+    }
 
     clearConsole();
     printf("Tekstas siunčiamas...\n");
@@ -278,16 +286,28 @@ void sendImage(Matrix G, Matrix H, syndromesTable syndromes, int n, int k, doubl
             }
 
             // Encode the image part
+            // auto start = std::chrono::high_resolution_clock::now(); // Start timer for benchmarking / identifying how long decoding takes
             Vec encodedPart = encodeMessage(G, binaryImageData[i], k, &addedBits);
             encodedImage.push_back(encodedPart);
+            // auto end = std::chrono::high_resolution_clock::now(); // Ends timer for benchmarking, shows how long it took
+            // std::chrono::duration<double> encodeDuration = end - start;
+            // std::cout << "Užkodavimas truko: " << encodeDuration.count() << "s" << std::endl;
 
             // Send image part trough channel
+            // auto startSend = std::chrono::high_resolution_clock::now(); // Start timer for benchmarking / identifying how long decoding takes
             Vec receivedPart = introduceErrors(encodedPart, errorRate);
             receivedImage.push_back(receivedPart);
+            // auto endSend = std::chrono::high_resolution_clock::now(); // Ends timer for benchmarking, shows how long it took
+            // std::chrono::duration<double> sendDuration = endSend - startSend;
+            // std::cout << "Kanalas truko " << sendDuration.count() << "s" << std::endl;
 
             // Decode the received image part
+            // auto startDecode = std::chrono::high_resolution_clock::now(); // Start timer for benchmarking / identifying how long decoding take
             Vec decodedPart = decodeMessage(H, receivedPart, syndromes, n, k);
             decodedImage.push_back(decodedPart);
+            // auto endDecode = std::chrono::high_resolution_clock::now(); // Ends timer for benchmarking, shows how long it took
+            // std::chrono::duration<double> decodeDuration = endDecode - startDecode;
+            // std::cout << "Dekodavimas truko" << decodeDuration.count() << "s" << std::endl;
 
             // Send the same image part without using encoding to compare results
             Vec sentPart = introduceErrors(binaryImageData[i], errorRate);
@@ -482,7 +502,7 @@ void showParameters(Matrix G, Matrix H, int n, int k, double errorRate, syndrome
         case 4:
             clearConsole();
             printf("Sugeneruoti sindromai:\n");
-            displaySyndromes(syndromes);
+            // displaySyndromes(syndromes);
             printf("\nSpauskite Enter norint sugrįžti...");
             std::cin.get();
             break;

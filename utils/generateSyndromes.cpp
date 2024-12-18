@@ -7,7 +7,7 @@
 #include <algorithm>
 
 syndromesTable generateSyndromes(int n, int k, const Matrix& H, bool showProgress) {
-    syndromesTable syndromes; // Vector for storing generated syndromes for returning
+    // syndromesTable syndromes; // Vector for storing generated syndromes for returning
     std::unordered_map<std::vector<uint8_t>, int, VectorHash> syndromeMap; // Map for storing unique syndromes
     int syndromeCount = pow(2, n - k); // Calculate the amount of syndromes to generate
     int calculatedSyndromes = 0;
@@ -28,7 +28,7 @@ syndromesTable generateSyndromes(int n, int k, const Matrix& H, bool showProgres
     multiplyMatrices(H, cosetTransposed, syndromeMatrix);
     Vec syndrome;
     transposeMatrixToVector(syndromeMatrix, syndrome);
-    syndromes.emplace_back(0, syndrome);
+    // syndromes.emplace_back(0, syndrome);
     syndromeMap[syndrome] = 0;
     calculatedSyndromes++;
 
@@ -61,7 +61,7 @@ syndromesTable generateSyndromes(int n, int k, const Matrix& H, bool showProgres
 
             // Check uniqueness
             if (syndromeMap.find(syndrome) == syndromeMap.end()) {
-                syndromes.emplace_back(weight, syndrome);
+                // syndromes.emplace_back(weight, syndrome);
                 syndromeMap[syndrome] = weight;
                 calculatedSyndromes++;
 
@@ -77,7 +77,7 @@ syndromesTable generateSyndromes(int n, int k, const Matrix& H, bool showProgres
         }
     }
 
-    return syndromes;
+    return syndromeMap;
 }
 
 void generateCombinations(int n, int weight, std::vector<std::vector<int>>& combinations) {

@@ -5,6 +5,7 @@
 
 #include "matrix.h"
 #include "generateSyndromes.h"
+#include <unordered_map>
 
 // Decodes the message or it's part
 std::vector<uint8_t> decodeMessage(const Matrix& H, const std::vector<uint8_t>& receivedMessage, syndromesTable syndromes, int n, int k);
