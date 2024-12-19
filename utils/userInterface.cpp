@@ -262,9 +262,10 @@ void sendImage(Matrix G, Matrix H, syndromesTable syndromes, int n, int k, doubl
     Matrix sentImage;
 
     // Skip the header of the image to avoid corrupting it
-    int headerSize = 54;
-    int partsToSkip = (headerSize * 8 + k - 1) / k;
+    // int headerSize = 54;
+    // int partsToSkip = (headerSize * 8 + k - 1) / k;
     size_t binaryImageDataSize = binaryImageData.size();
+    // printf("Dalinamasi į %d dalis\n", binaryImageDataSize - partsToSkip);
 
     // Set update interval
     // Interval is bigger due to images being composed of much more data than text
@@ -272,47 +273,39 @@ void sendImage(Matrix G, Matrix H, syndromesTable syndromes, int n, int k, doubl
 
     // Start the sending / decoding process
     for (size_t i = 0; i < binaryImageDataSize; ++i) {
-        // Skip the header of the image
-        if (i < partsToSkip) {
-            encodedImage.push_back(binaryImageData[i]);
-            receivedImage.push_back(binaryImageData[i]);
-            decodedImage.push_back(binaryImageData[i]);
-            sentImage.push_back(binaryImageData[i]);
-        } else {
-            // If the user wants to see progress, show it as percentage of completion
-            if (showProgress && i % progressUpdateInterval == 0) {
-                printf("Siunčiama nuotrauka: %d%%\r", static_cast<int>((i - partsToSkip) * 100 / (binaryImageDataSize - partsToSkip)));
-                fflush(stdout);
-            }
-
-            // Encode the image part
-            // auto start = std::chrono::high_resolution_clock::now(); // Start timer for benchmarking / identifying how long decoding takes
-            Vec encodedPart = encodeMessage(G, binaryImageData[i], k, &addedBits);
-            encodedImage.push_back(encodedPart);
-            // auto end = std::chrono::high_resolution_clock::now(); // Ends timer for benchmarking, shows how long it took
-            // std::chrono::duration<double> encodeDuration = end - start;
-            // std::cout << "Užkodavimas truko: " << encodeDuration.count() << "s" << std::endl;
-
-            // Send image part trough channel
-            // auto startSend = std::chrono::high_resolution_clock::now(); // Start timer for benchmarking / identifying how long decoding takes
-            Vec receivedPart = introduceErrors(encodedPart, errorRate);
-            receivedImage.push_back(receivedPart);
-            // auto endSend = std::chrono::high_resolution_clock::now(); // Ends timer for benchmarking, shows how long it took
-            // std::chrono::duration<double> sendDuration = endSend - startSend;
-            // std::cout << "Kanalas truko " << sendDuration.count() << "s" << std::endl;
-
-            // Decode the received image part
-            // auto startDecode = std::chrono::high_resolution_clock::now(); // Start timer for benchmarking / identifying how long decoding take
-            Vec decodedPart = decodeMessage(H, receivedPart, syndromes, n, k);
-            decodedImage.push_back(decodedPart);
-            // auto endDecode = std::chrono::high_resolution_clock::now(); // Ends timer for benchmarking, shows how long it took
-            // std::chrono::duration<double> decodeDuration = endDecode - startDecode;
-            // std::cout << "Dekodavimas truko" << decodeDuration.count() << "s" << std::endl;
-
-            // Send the same image part without using encoding to compare results
-            Vec sentPart = introduceErrors(binaryImageData[i], errorRate);
-            sentImage.push_back(sentPart);
+        // If the user wants to see progress, show it as percentage of completion
+        if (showProgress && i % progressUpdateInterval == 0) {
+            printf("Siunčiama nuotrauka: %d%%\r", static_cast<int>((i) * 100 / (binaryImageDataSize)));
+            fflush(stdout);
         }
+
+        // Encode the image part
+        // auto start = std::chrono::high_resolution_clock::now(); // Start timer for benchmarking / identifying how long decoding takes
+        Vec encodedPart = encodeMessage(G, binaryImageData[i], k, &addedBits);
+        encodedImage.push_back(encodedPart);
+        // auto end = std::chrono::high_resolution_clock::now(); // Ends timer for benchmarking, shows how long it took
+        // std::chrono::duration<double> encodeDuration = end - start;
+        // std::cout << "Užkodavimas truko: " << encodeDuration.count() << "s" << std::endl;
+
+        // Send image part trough channel
+        // auto startSend = std::chrono::high_resolution_clock::now(); // Start timer for benchmarking / identifying how long decoding takes
+        Vec receivedPart = introduceErrors(encodedPart, errorRate);
+        receivedImage.push_back(receivedPart);
+        // auto endSend = std::chrono::high_resolution_clock::now(); // Ends timer for benchmarking, shows how long it took
+        // std::chrono::duration<double> sendDuration = endSend - startSend;
+        // std::cout << "Kanalas truko " << sendDuration.count() << "s" << std::endl;
+
+        // Decode the received image part
+        // auto startDecode = std::chrono::high_resolution_clock::now(); // Start timer for benchmarking / identifying how long decoding take
+        Vec decodedPart = decodeMessage(H, receivedPart, syndromes, n, k);
+        decodedImage.push_back(decodedPart);
+        // auto endDecode = std::chrono::high_resolution_clock::now(); // Ends timer for benchmarking, shows how long it took
+        // std::chrono::duration<double> decodeDuration = endDecode - startDecode;
+        // std::cout << "Dekodavimas truko" << decodeDuration.count() << "s" << std::endl;
+
+        // Send the same image part without using encoding to compare results
+        Vec sentPart = introduceErrors(binaryImageData[i], errorRate);
+        sentImage.push_back(sentPart);
     }
 
     // Remove the added bits from the last vector if they were added

@@ -1,7 +1,7 @@
 SRC = $(wildcard */*.cpp) linear-code.cpp
 
 build:
-	g++ -O3 $(SRC) -o linear-code
+	g++ -O3 $(SRC) -o linear-code -fopenmp -march=native
 
 run:
 	make cleanLin
