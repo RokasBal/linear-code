@@ -25,23 +25,9 @@ std::vector<uint8_t> decodeMessage(const Matrix& H, const std::vector<uint8_t>& 
     int cosetWeight = -1; // Initialize the coset weight to -1 to allow checking for problems with syndrome generation
     for (int j = 0; j < n; ++j) {
         // Calculate syndrome for message or it's part
-        // auto startVector = std::chrono::high_resolution_clock::now();
         transposeVector(message, messageT);
-        // auto endVector = std::chrono::high_resolution_clock::now();
-        // std::chrono::duration<double> vectorDuration = endVector - startVector;
-        // std::cout << "Vector duration: " << vectorDuration.count() << "s" << std::endl;
-
-        // auto startMatrix = std::chrono::high_resolution_clock::now();
         multiplyMatrices(H, messageT, syndrome);
-        // auto endMatrix = std::chrono::high_resolution_clock::now();
-        // std::chrono::duration<double> matrixDuration = endMatrix - startMatrix;
-        // std::cout << "Matrix duration: " << matrixDuration.count() << "s" << std::endl;
-
-        // auto startTranspose = std::chrono::high_resolution_clock::now();
         transposeMatrixToVector(syndrome, syndromeVector);
-        // auto endTranspose = std::chrono::high_resolution_clock::now();
-        // std::chrono::duration<double> transposeDuration = endTranspose - startTranspose;
-        // std::cout << "Transpose duration: " << transposeDuration.count() << "s" << std::endl;
 
         // Find the coresponding weight for the syndrome based on generated syndromes
         auto it = syndromes.find(syndromeVector);

@@ -47,18 +47,15 @@ void multiplyMatrices(const Matrix& matrix1, const Matrix& matrix2, Matrix& resu
     size_t cols = matrix2[0].size();
     size_t common = matrix2.size();
 
-    // if (rows == 0 || cols == 0 || common != matrix1[0].size()) {
-    //     throw std::invalid_argument("Invalid dimensions for matrix-matrix multiplication");
-    // }
-
     // Initialize the result matrix to the correct size with all elements set to 0
     result.assign(rows, std::vector<uint8_t>(cols, 0));
 
     // Multiply the matrices
     for (size_t i = 0; i < rows; ++i) {
         for (size_t k = 0; k < common; ++k) {
+            if (matrix1[i][k] == 0) continue;
             uint8_t multiplier = matrix1[i][k];
-            if (multiplier == 0) continue; 
+            // if (multiplier == 0) continue; 
             for (size_t j = 0; j < cols; ++j) {
                 result[i][j] ^= (multiplier & matrix2[k][j]);
             }
@@ -105,10 +102,6 @@ void transposeVector(const Vec& vector, Matrix& result) {
 }
 
 void transposeMatrixToVector(const Matrix& matrix, Vec& result) {
-    // if (matrix.empty() || matrix[0].size() != 1) {
-    //     throw std::invalid_argument("Invalid matrix dimensions for transposing to vector");
-    // }
-    
     size_t rows = matrix.size();
     result.resize(rows);
     

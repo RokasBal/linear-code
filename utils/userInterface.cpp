@@ -296,12 +296,8 @@ void sendImage(Matrix G, Matrix H, syndromesTable syndromes, int n, int k, doubl
         // std::cout << "Kanalas truko " << sendDuration.count() << "s" << std::endl;
 
         // Decode the received image part
-        // auto startDecode = std::chrono::high_resolution_clock::now(); // Start timer for benchmarking / identifying how long decoding take
         Vec decodedPart = decodeMessage(H, receivedPart, syndromes, n, k);
         decodedImage.push_back(decodedPart);
-        // auto endDecode = std::chrono::high_resolution_clock::now(); // Ends timer for benchmarking, shows how long it took
-        // std::chrono::duration<double> decodeDuration = endDecode - startDecode;
-        // std::cout << "Dekodavimas truko" << decodeDuration.count() << "s" << std::endl;
 
         // Send the same image part without using encoding to compare results
         Vec sentPart = introduceErrors(binaryImageData[i], errorRate);
